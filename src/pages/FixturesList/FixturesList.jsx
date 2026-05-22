@@ -118,6 +118,7 @@ export default function FixturesLists() {
       const docRef = doc(db, "palpites", `${user.uid}_${fixtureId}`);
       const data = {
         userId: user.uid,
+        name: user.displayName,
         fixtureId: id,
         golsTime1: Number(g1),
         golsTime2: Number(g2),
@@ -126,7 +127,8 @@ export default function FixturesLists() {
       await setDoc(docRef, data);
       setFixturesData((prev) => ({ ...prev, palpites: { ...prev.palpites, [id]: data } }));
       toast.success("Palpite salvo!");
-    } catch {
+    } catch (error) {
+      console.log(error)
       toast.error("Erro ao salvar palpite.");
     } finally {
       setSavingId(null);
