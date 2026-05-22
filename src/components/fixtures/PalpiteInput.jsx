@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ROUNDS } from "@/constants/rounds";
-import { formatTime } from "@/utils/dateFormatter";
+import { formatTime, formatDate } from "@/utils/dateFormatter";
+import { TeamLogo } from "@/components/TeamLogo";
 
 export default function PalpiteInput({ fixture, palpite, onSave, saving }) {
   const [g1, setG1] = useState(palpite?.golsTime1 ?? "");
@@ -29,7 +30,7 @@ export default function PalpiteInput({ fixture, palpite, onSave, saving }) {
               <Badge variant="secondary" className="text-xs py-0">Em andamento</Badge>
             ) : (
               <Badge variant="outline" className="text-xs py-1 px-2 border-teal-500 text-teal-400 bg-teal-500/10">
-                Aberto até {formatTime(fixture.fixture.date)}
+                Aberto até {formatDate(fixture.fixture.date)} {formatTime(fixture.fixture.date)}
               </Badge>
             )}
           </div>
@@ -41,7 +42,7 @@ export default function PalpiteInput({ fixture, palpite, onSave, saving }) {
         <div className="px-4 py-3">
           <div className="flex items-center gap-3">
             <div className="flex-1 flex flex-col items-center gap-1">
-              <img src={homeFlag} className="size-8 object-contain" />
+              <TeamLogo src={homeFlag} name={fixture.teams.home.name} size={32} />
               <span className="text-sm font-medium text-center leading-tight">
                 {fixture.teams.home.name}
               </span>
@@ -71,7 +72,7 @@ export default function PalpiteInput({ fixture, palpite, onSave, saving }) {
             </div>
 
             <div className="flex-1 flex flex-col items-center gap-1">
-              <img src={awayFlag} className="size-8 object-contain" />
+              <TeamLogo src={awayFlag} name={fixture.teams.away.name} size={32} />
               <span className="text-sm font-medium text-center leading-tight">
                 {fixture.teams.away.name}
               </span>

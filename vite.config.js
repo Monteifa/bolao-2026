@@ -14,4 +14,13 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      "/api/images": {
+        target: "https://media.api-sports.io",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/images/, ""),
+      },
+    },
+  },
 })

@@ -8,13 +8,24 @@ import {
   derivarRodadas,
   detectarRodadaAtual
 } from "@/api/api";
+// TEMP: remove next line before final release
+import { fetchBrasileiraoFixtures } from "@/api/brasileirao";
 import { STATUS_LIVE, STATUS_FINISHED } from "@/utils/fixtureStatus";
 import Layout from "@/components/Layout";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LiveCard, PalpiteInput, FinishedCard, Section } from "@/components/fixtures";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+// TEMP: remove this constant before final release
+const COMPETITIONS = [
+  { value: "copa", label: "Copa do Mundo" },
+  { value: "brasileirao", label: "Brasileirao" },
+];
 
 export default function FixturesLists() {
   const { user } = useAuth();
+  // TEMP: remove `competition` state before final release
+  const [competition, setCompetition] = useState("copa");
   const [rounds, setRounds] = useState([]);
   const [selectedRound, setSelectedRound] = useState(null);
   const [fixturesData, setFixturesData] = useState({ round: null, list: [], palpites: {} });
@@ -22,13 +33,33 @@ export default function FixturesLists() {
   const [savingId, setSavingId] = useState(null);
   const [allFixtures, setAllFixtures] = useState([]);
 
-  const loadingFixtures = !!selectedRound && !!allFixtures.length && selectedRound !== fixturesData.round;
+  const loadingFixtures = competition === "copa"
+    ? !!selectedRound && !!allFixtures.length && selectedRound !== fixturesData.round
+    : false;
 
-  // carrega tudo uma vez só
+  // carrega tudo uma vez só — ou quando muda de competição (TEMP branch)
   useEffect(() => {
+    let cancelled = false;
+
     const init = async () => {
+      setLoading(true);
+      setAllFixtures([]);
+      setRounds([]);
+      setSelectedRound(null);
+      setFixturesData({ round: null, list: [], palpites: {} });
+
       try {
+        // TEMP: brasileirao branch — remove before final release
+        if (competition === "brasileirao") {
+          const fixtures = await fetchBrasileiraoFixtures();
+          if (cancelled) return;
+          setAllFixtures(fixtures);
+          setFixturesData({ round: "brasileirao", list: fixtures, palpites: {} });
+          return;
+        }
+
         const todos = await fetchTodosFixtures();
+        if (cancelled) return;
         const rounds = derivarRodadas(todos);
         const rodadaAtual = detectarRodadaAtual(todos);
 
@@ -36,13 +67,15 @@ export default function FixturesLists() {
         setRounds(rounds);
         setSelectedRound(rodadaAtual);
       } catch {
-        toast.error("Erro ao carregar rodadas.");
+        if (!cancelled) toast.error("Erro ao carregar rodadas.");
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
+
     init();
-  }, []);
+    return () => { cancelled = true; };
+  }, [competition]);
 
   // troca de rodada filtra localmente — sem nova chamada à API
   useEffect(() => {
@@ -57,10 +90,10 @@ export default function FixturesLists() {
         if (cancelled) return;
         const map = {};
         snap.forEach((d) => {
-        const data = d.data();
-        const id = String(data.fixtureId);
-        if (ids.includes(id)) map[id] = data; // ← chave sempre string
-      });
+          const data = d.data();
+          const id = String(data.fixtureId);
+          if (ids.includes(id)) map[id] = data;
+        });
         setFixturesData({ round: selectedRound, list: filtered, palpites: map });
       })
       .catch(() => { if (!cancelled) toast.error("Erro ao carregar palpites."); });
@@ -80,11 +113,11 @@ export default function FixturesLists() {
 
     setSavingId(fixtureId);
     try {
-      const id = String(fixtureId)
+      const id = String(fixtureId);
       const docRef = doc(db, "palpites", `${user.uid}_${fixtureId}`);
       const data = {
         userId: user.uid,
-        fixtureId: id, 
+        fixtureId: id,
         golsTime1: Number(g1),
         golsTime2: Number(g2),
         criadoEm: serverTimestamp(),
@@ -121,12 +154,28 @@ export default function FixturesLists() {
   return (
     <Layout>
       <div className="p-4">
-        <Section
-          title="Rodada"
-          rounds={rounds}
-          selectedRound={selectedRound}
-          onRoundChange={setSelectedRound}
-        />
+        {/* TEMP: competition selector — remove before final release */}
+        <div className="flex justify-end mb-4">
+          <Select value={competition} onValueChange={setCompetition}>
+            <SelectTrigger className="w-44">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent position="popper" side="bottom">
+              {COMPETITIONS.map((c) => (
+                <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {competition === "copa" && (
+          <Section
+            title="Rodada"
+            rounds={rounds}
+            selectedRound={selectedRound}
+            onRoundChange={setSelectedRound}
+          />
+        )}
 
         {loadingFixtures ? (
           <div className="space-y-3">
