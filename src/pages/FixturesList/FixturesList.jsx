@@ -191,7 +191,7 @@ export default function FixturesLists() {
               ))}
             </Section>
 
-            <Section title="Hoje" count={today.length}>
+            <Section title="Jogos" count={today.length}>
               {today.map((f) => (
                 <PalpiteInput
                   key={f.fixture.id}
