@@ -55,6 +55,7 @@ export default function FixturesLists() {
           if (cancelled) return;
           setAllFixtures(fixtures);
           setFixturesData({ round: "brasileirao", list: fixtures, palpites: {} });
+          setSelectedRound("Regular Season - 17");
           return;
         }
 
@@ -92,7 +93,7 @@ export default function FixturesLists() {
         snap.forEach((d) => {
           const data = d.data();
           const id = String(data.fixtureId);
-          if (ids.includes(id)) map[id] = data;
+         if (ids.includes(id)) map[id] = data;
         });
         setFixturesData({ round: selectedRound, list: filtered, palpites: map });
       })
@@ -194,7 +195,7 @@ export default function FixturesLists() {
             <Section title="Jogos" count={today.length}>
               {today.map((f) => (
                 <PalpiteInput
-                  key={f.fixture.id}
+                  key={`${f.fixture.id}-${palpitesMap[f.fixture.id] != null}`}
                   fixture={f}
                   palpite={palpitesMap[f.fixture.id]}
                   onSave={handleSave}

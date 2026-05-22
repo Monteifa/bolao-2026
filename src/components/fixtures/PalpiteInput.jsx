@@ -10,6 +10,7 @@ import { TeamLogo } from "@/components/TeamLogo";
 export default function PalpiteInput({ fixture, palpite, onSave, saving }) {
   const [g1, setG1] = useState(palpite?.golsTime1 ?? "");
   const [g2, setG2] = useState(palpite?.golsTime2 ?? "");
+
   const gameTime = new Date(fixture.fixture.date);
   const started = new Date() >= gameTime;
   const hasPalpite = palpite != null;
@@ -22,7 +23,7 @@ export default function PalpiteInput({ fixture, palpite, onSave, saving }) {
   const awayFlag = fixture.teams.away.logo;
 
   return (
-    <Card className="overflow-hidden rounded-xl p-3">
+    <Card className="overflow-hidden p-3">
       <CardContent className="p-0">
         <div className="flex items-center justify-between px-3 py-1.5">
           <div className="flex items-center gap-1.5">
@@ -41,7 +42,7 @@ export default function PalpiteInput({ fixture, palpite, onSave, saving }) {
 
         <div className="px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="flex-1 flex flex-col items-center gap-1">
+            <div className="flex-1 flex flex-col items-center gap-2">
               <TeamLogo src={homeFlag} name={fixture.teams.home.name} size={32} />
               <span className="text-sm font-medium text-center leading-tight">
                 {fixture.teams.home.name}
@@ -71,7 +72,7 @@ export default function PalpiteInput({ fixture, palpite, onSave, saving }) {
               />
             </div>
 
-            <div className="flex-1 flex flex-col items-center gap-1">
+            <div className="flex-1 flex flex-col items-center gap-2">
               <TeamLogo src={awayFlag} name={fixture.teams.away.name} size={32} />
               <span className="text-sm font-medium text-center leading-tight">
                 {fixture.teams.away.name}
