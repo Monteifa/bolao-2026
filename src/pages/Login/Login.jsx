@@ -30,16 +30,15 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-background flex items-center justify-center p-6">
       <div className="w-full max-w-sm flex flex-col items-center gap-8">
-        <div className="w-20 h-20 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg">
-          <Trophy className="w-10 h-10 text-white" />
+        <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
+          <Trophy className="w-10 h-10 text-primary-foreground" />
         </div>
 
         <div className="text-center space-y-2">
-          <h1 class="font-display font-[Fraunces,ui-serif,serif] text-7xl mt-1 leading-[0.95] tracking-tight">Copa<br/><span class="italic font-normal">2026</span></h1>
-          <h1 className="text-2xl font-bold text-gray-900">Bolão Copa 2026</h1>
-          <p className="text-gray-500 text-sm leading-relaxed">
+          <h1 class="font-display font-[Fraunces,ui-serif,serif] text-7xl mt-1 leading-[0.95] tracking-tight text-foreground">Copa<br/><span class="italic font-normal">2026</span></h1>
+          <p className="text-muted-foreground text-sm leading-relaxed">
             Faça seus palpites e dispute o ranking com seus amigos
           </p>
         </div>
@@ -48,7 +47,7 @@ export default function Login() {
           onClick={handleLogin}
           disabled={signing || loading}
           variant="outline"
-          className="w-full h-12 gap-3 text-base border-gray-300 bg-white hover:bg-gray-50 text-gray-700 shadow-sm"
+          className="w-full h-12 gap-3 text-base border-border bg-card hover:bg-secondary text-foreground shadow-sm"
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
             <path d="M19.6 10.23c0-.68-.06-1.36-.18-2H10v3.79h5.4a4.63 4.63 0 01-2 3.04v2.53h3.24c1.89-1.74 2.96-4.3 2.96-7.36z" fill="#4285F4"/>
