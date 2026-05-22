@@ -8,6 +8,7 @@ export const BRASILEIRAO_QUERY = {
   league: 71,
   season: 2026,
   date: "2026-05-23",
+  timezone: "America/Sao_Paulo",
 };
 
 export async function fetchBrasileiraoFixtures() {
