@@ -21,7 +21,9 @@ export default function Login() {
     try {
       await signInWithPopup(auth, provider);
     } catch (error) {
-      if (error.code !== "auth/popup-closed-by-user") {
+      if (error.code === "auth/missing-initial-state") {
+        toast.error("Seu navegador bloqueou o login. Tente usar o Chrome ou desativar o bloqueio de cookies.");
+      } else if (error.code !== "auth/popup-closed-by-user") {
         toast.error("Erro ao entrar com Google. Tente novamente.");
       }
     } finally {
