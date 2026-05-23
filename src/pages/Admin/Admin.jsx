@@ -5,14 +5,25 @@ import { toast } from "sonner";
 import { db } from "@/firebase/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchRounds, fetchFixturesByRound } from "@/api/api";
+// TEMP: remove next line before final release
+import { fetchBrasileiraoFixtures } from "@/api/brasileirao";
 import { apurarJogo, apurarTodosPendentes } from "@/lib/apuracao";
 import Layout from "@/components/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+// TEMP: remove before final release
+const COMPETITIONS = [
+  { value: "copa", label: "Copa do Mundo" },
+  { value: "brasileirao", label: "Brasileirao" },
+];
 
 export default function Admin() {
   const { user } = useAuth();
+  // TEMP: remove `competition` state before final release
+  const [competition, setCompetition] = useState("copa");
   const [fixtures, setFixtures] = useState([]);
   const [jogosApurados, setJogosApurados] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,25 +32,27 @@ export default function Admin() {
 
   useEffect(() => {
     const load = async () => {
+      setLoading(true);
+      setFixtures([]);
       try {
-        const [rounds, apuradosSnap] = await Promise.all([
-          fetchRounds(),
+        const [allFixtures, apuradosSnap] = await Promise.all([
+          // TEMP: brasileirao branch — remove before final release
+          competition === "brasileirao"
+            ? fetchBrasileiraoFixtures()
+            : (async () => {
+                const rounds = await fetchRounds();
+                const arr = [];
+                for (const round of rounds) {
+                  const rf = await fetchFixturesByRound(round);
+                  if (rf) arr.push(...rf);
+                }
+                return arr;
+              })(),
           getDocs(collection(db, "jogosApurados")),
         ]);
 
-        const apuradosIds = apuradosSnap.docs.map((d) => d.id);
-        setJogosApurados(apuradosIds);
-
-        const allFixtures = [];
-        for (const round of rounds) {
-          const roundFixtures = await fetchFixturesByRound(round);
-          if (roundFixtures) allFixtures.push(...roundFixtures);
-        }
-
-        const encerrados = allFixtures.filter(
-          (f) => f.fixture.status.short === "FT"
-        );
-        setFixtures(encerrados);
+        setJogosApurados(apuradosSnap.docs.map((d) => d.id));
+        setFixtures(allFixtures.filter((f) => f.fixture.status.short === "FT"));
       } catch (err) {
         console.error("Erro ao carregar admin:", err);
         toast.error("Erro ao carregar dados");
@@ -48,7 +61,7 @@ export default function Admin() {
       }
     };
     load();
-  }, []);
+  }, [competition]);
 
   const handleApurarTodos = async () => {
     setApurando(true);
@@ -113,6 +126,20 @@ export default function Admin() {
   return (
     <Layout title="Admin" subtitle="Painel de apuração">
       <div className="p-4 space-y-4">
+        {/* TEMP: competition selector — remove before final release */}
+        <div className="flex justify-end">
+          <Select value={competition} onValueChange={setCompetition}>
+            <SelectTrigger className="w-44">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent position="popper" side="bottom">
+              {COMPETITIONS.map((c) => (
+                <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="flex items-center justify-between flex-wrap gap-2">
           <p className="text-sm text-muted-foreground">
             {fixtures.length} encerrados · {jogosApurados.length} apurados · {pendentes.length} pendentes
