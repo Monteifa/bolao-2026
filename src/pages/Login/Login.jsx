@@ -1,9 +1,8 @@
-import { signInWithPopup } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Trophy } from "lucide-react";
 import { toast } from "sonner";
-import { auth, provider } from "@/firebase/firebase";
+import { loginComGoogle } from "@/lib/auth";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 
@@ -19,11 +18,9 @@ export default function Login() {
   const handleLogin = async () => {
     setSigning(true);
     try {
-      await signInWithPopup(auth, provider);
+      await loginComGoogle();
     } catch (error) {
-      if (error.code === "auth/missing-initial-state") {
-        toast.error("Seu navegador bloqueou o login. Tente usar o Chrome ou desativar o bloqueio de cookies.");
-      } else if (error.code !== "auth/popup-closed-by-user") {
+      if (error.code !== "auth/popup-closed-by-user") {
         toast.error("Erro ao entrar com Google. Tente novamente.");
       }
     } finally {
