@@ -90,21 +90,20 @@ export default function MeusPalpites() {
         setStats(s);
 
         // TEMP: skip pontuacao write for brasileirao to avoid overwriting real scores
-        if (competition !== "brasileirao") {
-          await setDoc(
-            doc(db, "pontuacao", user.uid),
-            {
-              nome: user.displayName,
-              foto: user.photoURL,
-              total: s.total,
-              acertosExatos: s.exatos,
-              acertosVencedor: s.resultado,
-              erros: s.erros,
-              atualizadoEm: serverTimestamp(),
-            },
-            { merge: true }
-          );
-        }
+        
+        await setDoc(
+          doc(db, "pontuacao", user.uid),
+          {
+            nome: user.displayName,
+            foto: user.photoURL,
+            total: s.total,
+            acertosExatos: s.exatos,
+            acertosVencedor: s.resultado,
+            erros: s.erros,
+            atualizadoEm: serverTimestamp(),
+          },
+          { merge: true }
+        );
       } catch {
         if (!cancelled) toast.error("Erro ao carregar seus palpites.");
       } finally {
