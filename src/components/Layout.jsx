@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Trophy, User, ShieldCheck } from "lucide-react";
+import { Home, Trophy, User, ShieldCheck, Star } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,6 +9,7 @@ import { cn } from "@/utils/cn";
 const NAV_ITEMS = [
   { path: "/palpites", icon: Home, label: "Jogos" },
   { path: "/ranking", icon: Trophy, label: "Ranking" },
+  { path: "/extras", icon: Star, label: "Extras" },
   { path: "/meus-palpites", icon: User, label: "Meus Palpites" },
   { path: "/admin", icon: ShieldCheck, label: "Admin", adminOnly: true },
 ];

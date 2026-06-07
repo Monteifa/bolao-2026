@@ -128,7 +128,7 @@ export default function Ranking() {
                     {userEntry.nome} — {userPos}º lugar
                   </p>
                   <p className="text-primary-foreground/60 text-xs mt-0.5">
-                    {userEntry.acertosExatos} exatos · {userEntry.acertosVencedor} resultados
+                    {userEntry.acertosExatos} exatos · {userEntry.acertosVencedor} result. · {userEntry.total - (userEntry.pontosExtras || 0)} jogos + {userEntry.pontosExtras || 0} extras
                   </p>
                 </div>
                 <div className="text-right">
@@ -174,6 +174,7 @@ export default function Ranking() {
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {entry.acertosExatos} exatos · {entry.acertosVencedor} result.
+                        {entry.pontosExtras > 0 && ` · +${entry.pontosExtras} extras`}
                       </p>
                     </div>
 

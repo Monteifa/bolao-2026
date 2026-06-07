@@ -1,3 +1,12 @@
+export function normalizar(str) {
+  if (!str) return ""
+  return str
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+}
+
 export function calcularPontos(palpite, resultadoReal) {
   const p1 = palpite.golsTime1;
   const p2 = palpite.golsTime2;

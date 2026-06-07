@@ -4,20 +4,11 @@ import { toast } from "sonner";
 import { db } from "@/firebase/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchTodosFixtures } from "@/api/api";
-// TEMP: remove next line before final release
-import { fetchBrasileiraoFixtures } from "@/api/brasileirao";
 import { calcularPontos } from "@/utils/pontuacao";
 import Layout from "@/components/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-// TEMP: remove before final release
-const COMPETITIONS = [
-  { value: "copa", label: "Copa do Mundo" },
-  { value: "brasileirao", label: "Brasileirao" },
-];
 
 const STATUS_FINISHED = ["FT", "AET", "PEN"];
 
@@ -34,8 +25,6 @@ function StatCard({ label, value, className = "" }) {
 
 export default function MeusPalpites() {
   const { user } = useAuth();
-  // TEMP: remove `competition` state before final release
-  const [competition, setCompetition] = useState("copa");
   const [items, setItems] = useState([]);
   const [stats, setStats] = useState({ total: 0, exatos: 0, resultado: 0, erros: 0 });
   const [loading, setLoading] = useState(true);
@@ -48,8 +37,7 @@ export default function MeusPalpites() {
       try {
         const [palpitesSnap, fixturesData] = await Promise.all([
           getDocs(query(collection(db, "palpites"), where("userId", "==", user.uid))),
-          // TEMP: brasileirao branch — remove before final release
-          competition === "brasileirao" ? fetchBrasileiraoFixtures() : fetchTodosFixtures(),
+          fetchTodosFixtures(),
         ]);
 
         if (cancelled) return;
@@ -89,8 +77,6 @@ export default function MeusPalpites() {
         );
         setStats(s);
 
-        // TEMP: skip pontuacao write for brasileirao to avoid overwriting real scores
-        
         await setDoc(
           doc(db, "pontuacao", user.uid),
           {
@@ -112,7 +98,7 @@ export default function MeusPalpites() {
     };
     load();
     return () => { cancelled = true; };
-  }, [user, competition]);
+  }, [user]);
 
   if (loading) {
     return (
@@ -130,20 +116,6 @@ export default function MeusPalpites() {
   return (
     <Layout>
       <div className="p-4 space-y-4">
-        {/* TEMP: competition selector — remove before final release */}
-        <div className="flex justify-end">
-          <Select value={competition} onValueChange={setCompetition}>
-            <SelectTrigger className="w-44">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent position="popper" side="bottom">
-              {COMPETITIONS.map((c) => (
-                <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
         <div className="grid grid-cols-4 gap-2">
           <StatCard label="Pontos" value={stats.total} />
           <StatCard

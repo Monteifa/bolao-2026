@@ -4,7 +4,7 @@ import {
   serverTimestamp, increment
 } from "firebase/firestore";
 import { db } from "@/firebase/firebase";
-import { calcularPontos } from "@/utils/pontuacao";
+import { calcularPontos, normalizar } from "@/utils/pontuacao";
 
 export async function apurarJogo(fixtureId, resultadoReal) {
   const jaApurado = await getDoc(doc(db, "jogosApurados", String(fixtureId)));
@@ -60,4 +60,45 @@ export async function apurarTodosPendentes(fixtures, jogosApurados) {
   }
 
   return resultados;
+}
+
+export async function apurarExtras() {
+  const resultadoSnap = await getDoc(doc(db, "resultadosExtras", "oficial"))
+  if (!resultadoSnap.exists()) {
+    return { sucesso: false, motivo: "Resultado oficial não cadastrado" }
+  }
+
+  const r = resultadoSnap.data()
+  if (r.apuradoEm) {
+    return { sucesso: false, motivo: "Extras já foram apurados" }
+  }
+
+  const snap = await getDocs(collection(db, "palpitesExtras"))
+
+  const atualizacoes = snap.docs.map(async (docSnap) => {
+    const p = docSnap.data()
+    let pontos = 0
+    const pontosExtras = { campeao: 0, vice: 0, terceiro: 0, artilheiro: 0, melhorJogador: 0 }
+
+    if (normalizar(p.campeao) === normalizar(r.campeao)) { pontos += 25; pontosExtras.campeao = 25 }
+    if (normalizar(p.vice) === normalizar(r.vice)) { pontos += 15; pontosExtras.vice = 15 }
+    if (normalizar(p.terceiro) === normalizar(r.terceiro)) { pontos += 10; pontosExtras.terceiro = 10 }
+    if (normalizar(p.artilheiro) === normalizar(r.artilheiro)) { pontos += 15; pontosExtras.artilheiro = 15 }
+    if (normalizar(p.melhorJogador) === normalizar(r.melhorJogador)) { pontos += 15; pontosExtras.melhorJogador = 15 }
+
+    await setDoc(doc(db, "pontuacao", p.userId), {
+      total: increment(pontos),
+      pontosExtras: increment(pontos),
+    }, { merge: true })
+
+    await updateDoc(docSnap.ref, { apurado: true })
+  })
+
+  await Promise.all(atualizacoes)
+
+  await updateDoc(doc(db, "resultadosExtras", "oficial"), {
+    apuradoEm: serverTimestamp(),
+  })
+
+  return { sucesso: true, total: snap.docs.length }
 }

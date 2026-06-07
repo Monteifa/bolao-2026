@@ -8,36 +8,24 @@ import {
   derivarRodadas,
   detectarRodadaAtual
 } from "@/api/api";
-// TEMP: remove next line before final release
-import { fetchBrasileiraoFixtures } from "@/api/brasileirao";
 import { STATUS_LIVE, STATUS_FINISHED } from "@/utils/fixtureStatus";
 import Layout from "@/components/Layout";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LiveCard, PalpiteInput, FinishedCard, Section } from "@/components/fixtures";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-// TEMP: remove this constant before final release
-const COMPETITIONS = [
-  { value: "copa", label: "Copa do Mundo" },
-  { value: "brasileirao", label: "Brasileirao" },
-];
+import { RegrasDialog } from "@/components/RegrasDialog";
 
 export default function FixturesLists() {
   const { user } = useAuth();
-  // TEMP: remove `competition` state before final release
-  const [competition, setCompetition] = useState("copa");
   const [rounds, setRounds] = useState([]);
   const [selectedRound, setSelectedRound] = useState(null);
   const [fixturesData, setFixturesData] = useState({ round: null, list: [], palpites: {} });
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState(null);
   const [allFixtures, setAllFixtures] = useState([]);
+  const [regraOpen, setRegraOpen] = useState(false);
 
-  const loadingFixtures = competition === "copa"
-    ? !!selectedRound && !!allFixtures.length && selectedRound !== fixturesData.round
-    : false;
+  const loadingFixtures = !!selectedRound && !!allFixtures.length && selectedRound !== fixturesData.round;
 
-  // carrega tudo uma vez só — ou quando muda de competição (TEMP branch)
   useEffect(() => {
     let cancelled = false;
 
@@ -49,16 +37,6 @@ export default function FixturesLists() {
       setFixturesData({ round: null, list: [], palpites: {} });
 
       try {
-        // TEMP: brasileirao branch — remove before final release
-        if (competition === "brasileirao") {
-          const fixtures = await fetchBrasileiraoFixtures();
-          if (cancelled) return;
-          setAllFixtures(fixtures);
-          setFixturesData({ round: "brasileirao", list: fixtures, palpites: {} });
-          setSelectedRound("Regular Season - 17");
-          return;
-        }
-
         const todos = await fetchTodosFixtures();
         if (cancelled) return;
         const rounds = derivarRodadas(todos);
@@ -76,7 +54,7 @@ export default function FixturesLists() {
 
     init();
     return () => { cancelled = true; };
-  }, [competition]);
+  }, []);
 
   // troca de rodada filtra localmente — sem nova chamada à API
   useEffect(() => {
@@ -157,28 +135,21 @@ export default function FixturesLists() {
   return (
     <Layout>
       <div className="p-4">
-        {/* TEMP: competition selector — remove before final release */}
-        <div className="flex justify-end mb-4">
-          <Select value={competition} onValueChange={setCompetition}>
-            <SelectTrigger className="w-44">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent position="popper" side="bottom">
-              {COMPETITIONS.map((c) => (
-                <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <button
+          onClick={() => setRegraOpen(true)}
+          className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors mb-3"
+        >
+          Ver regras de pontuação
+        </button>
 
-        {competition === "copa" && (
-          <Section
-            title="Rodada"
-            rounds={rounds}
-            selectedRound={selectedRound}
-            onRoundChange={setSelectedRound}
-          />
-        )}
+        <RegrasDialog open={regraOpen} onClose={setRegraOpen} />
+
+        <Section
+          title="Rodada"
+          rounds={rounds}
+          selectedRound={selectedRound}
+          onRoundChange={setSelectedRound}
+        />
 
         {loadingFixtures ? (
           <div className="space-y-3">

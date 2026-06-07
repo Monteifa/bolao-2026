@@ -1,58 +1,71 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc, setDoc } from "firebase/firestore";
 import { toast } from "sonner";
 import { db } from "@/firebase/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchRounds, fetchFixturesByRound } from "@/api/api";
-// TEMP: remove next line before final release
-import { fetchBrasileiraoFixtures } from "@/api/brasileirao";
-import { apurarJogo, apurarTodosPendentes } from "@/lib/apuracao";
+import { apurarJogo, apurarTodosPendentes, apurarExtras } from "@/lib/apuracao";
+import { extrairTimes } from "@/lib/times";
+import { normalizar } from "@/utils/pontuacao";
 import Layout from "@/components/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-// TEMP: remove before final release
-const COMPETITIONS = [
-  { value: "copa", label: "Copa do Mundo" },
-  { value: "brasileirao", label: "Brasileirao" },
-];
+import { Input } from "@/components/ui/input";
 
 export default function Admin() {
   const { user } = useAuth();
-  // TEMP: remove `competition` state before final release
-  const [competition, setCompetition] = useState("copa");
   const [fixtures, setFixtures] = useState([]);
   const [jogosApurados, setJogosApurados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [apurando, setApurando] = useState(false);
   const [apurandoId, setApurandoId] = useState(null);
 
+  const [timesExtras, setTimesExtras] = useState([]);
+  const [resultado, setResultado] = useState({ campeao: "", vice: "", terceiro: "", artilheiro: "", melhorJogador: "" });
+  const [resultadoSalvo, setResultadoSalvo] = useState(false);
+  const [jaApurado, setJaApurado] = useState(false);
+  const [apuradoEm, setApuradoEm] = useState(null);
+  const [apurandoExtras, setApurandoExtras] = useState(false);
+  const [salvandoResultado, setSalvandoResultado] = useState(false);
+
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       setFixtures([]);
       try {
-        const [allFixtures, apuradosSnap] = await Promise.all([
-          // TEMP: brasileirao branch — remove before final release
-          competition === "brasileirao"
-            ? fetchBrasileiraoFixtures()
-            : (async () => {
-                const rounds = await fetchRounds();
-                const arr = [];
-                for (const round of rounds) {
-                  const rf = await fetchFixturesByRound(round);
-                  if (rf) arr.push(...rf);
-                }
-                return arr;
-              })(),
+        const [rounds, apuradosSnap, resultadoSnap] = await Promise.all([
+          fetchRounds(),
           getDocs(collection(db, "jogosApurados")),
+          getDoc(doc(db, "resultadosExtras", "oficial")),
         ]);
+        const allFixtures = [];
+        for (const round of rounds) {
+          const rf = await fetchFixturesByRound(round);
+          if (rf) allFixtures.push(...rf);
+        }
 
         setJogosApurados(apuradosSnap.docs.map((d) => d.id));
         setFixtures(allFixtures.filter((f) => f.fixture.status.short === "FT"));
+        setTimesExtras(extrairTimes(allFixtures));
+
+        if (resultadoSnap.exists()) {
+          const data = resultadoSnap.data();
+          setResultado({
+            campeao: data.campeao || "",
+            vice: data.vice || "",
+            terceiro: data.terceiro || "",
+            artilheiro: data.artilheiro || "",
+            melhorJogador: data.melhorJogador || "",
+          });
+          setResultadoSalvo(true);
+          if (data.apuradoEm) {
+            setJaApurado(true);
+            setApuradoEm(data.apuradoEm);
+          }
+        }
       } catch (err) {
         console.error("Erro ao carregar admin:", err);
         toast.error("Erro ao carregar dados");
@@ -61,7 +74,7 @@ export default function Admin() {
       }
     };
     load();
-  }, [competition]);
+  }, []);
 
   const handleApurarTodos = async () => {
     setApurando(true);
@@ -87,13 +100,13 @@ export default function Admin() {
   const handleApurarJogo = async (fixture) => {
     setApurandoId(fixture.fixture.id);
     try {
-      const resultado = await apurarJogo(fixture.fixture.id, {
+      const res = await apurarJogo(fixture.fixture.id, {
         golsTime1: fixture.goals.home,
         golsTime2: fixture.goals.away,
       });
-      if (resultado.sucesso) {
+      if (res.sucesso) {
         setJogosApurados((prev) => [...prev, String(fixture.fixture.id)]);
-        toast.success(`Jogo apurado — ${resultado.totalPalpites} palpite(s)`);
+        toast.success(`Jogo apurado — ${res.totalPalpites} palpite(s)`);
       } else {
         toast.info("Jogo já havia sido apurado");
       }
@@ -105,6 +118,46 @@ export default function Admin() {
     }
   };
 
+  const salvarResultadoOficial = async () => {
+    setSalvandoResultado(true);
+    try {
+      await setDoc(doc(db, "resultadosExtras", "oficial"), {
+        campeao: resultado.campeao,
+        vice: resultado.vice,
+        terceiro: resultado.terceiro,
+        artilheiro: normalizar(resultado.artilheiro),
+        melhorJogador: normalizar(resultado.melhorJogador),
+      }, { merge: true });
+      setResultadoSalvo(true);
+      toast.success("Resultado salvo!");
+    } catch (err) {
+      console.error("Erro ao salvar resultado:", err);
+      toast.error("Erro ao salvar resultado");
+    } finally {
+      setSalvandoResultado(false);
+    }
+  };
+
+  const handleApurarExtras = async () => {
+    setApurandoExtras(true);
+    try {
+      const res = await apurarExtras();
+      if (res.sucesso) {
+        setJaApurado(true);
+        toast.success(`Extras apurados — ${res.total} palpite(s) processado(s)`);
+        const snap = await getDoc(doc(db, "resultadosExtras", "oficial"));
+        if (snap.exists()) setApuradoEm(snap.data().apuradoEm);
+      } else {
+        toast.error(res.motivo);
+      }
+    } catch (err) {
+      console.error("Erro ao apurar extras:", err);
+      toast.error("Erro ao apurar extras");
+    } finally {
+      setApurandoExtras(false);
+    }
+  };
+
   if (user?.email !== import.meta.env.VITE_ADMIN_EMAIL) {
     return <Navigate to="/palpites" replace />;
   }
@@ -112,6 +165,13 @@ export default function Admin() {
   const pendentes = fixtures.filter(
     (f) => !jogosApurados.includes(String(f.fixture.id))
   );
+
+  const formatarData = (ts) =>
+    ts?.toDate?.().toLocaleDateString("pt-BR", {
+      day: "2-digit", month: "2-digit", year: "numeric",
+      hour: "2-digit", minute: "2-digit",
+      timeZone: "America/Sao_Paulo",
+    }) ?? "";
 
   if (loading) {
     return (
@@ -126,20 +186,7 @@ export default function Admin() {
   return (
     <Layout title="Admin" subtitle="Painel de apuração">
       <div className="p-4 space-y-4">
-        {/* TEMP: competition selector — remove before final release */}
-        <div className="flex justify-end">
-          <Select value={competition} onValueChange={setCompetition}>
-            <SelectTrigger className="w-44">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent position="popper" side="bottom">
-              {COMPETITIONS.map((c) => (
-                <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
+        {/* ── Jogos ── */}
         <div className="flex items-center justify-between flex-wrap gap-2">
           <p className="text-sm text-muted-foreground">
             {fixtures.length} encerrados · {jogosApurados.length} apurados · {pendentes.length} pendentes
@@ -195,6 +242,84 @@ export default function Admin() {
             <div className="text-center py-12 text-muted-foreground text-sm">
               Nenhum jogo encerrado encontrado.
             </div>
+          )}
+        </div>
+
+        {/* ── Extras ── */}
+        <div className="border-t border-border pt-4 space-y-3">
+          <p className="text-sm font-semibold">Apuração de extras</p>
+
+          <div className="space-y-2">
+            <label className="text-xs text-muted-foreground">Campeão</label>
+            <Select value={resultado.campeao} onValueChange={(v) => setResultado(p => ({ ...p, campeao: v }))} disabled={jaApurado}>
+              <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+              <SelectContent>
+                {timesExtras.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs text-muted-foreground">Vice-campeão</label>
+            <Select value={resultado.vice} onValueChange={(v) => setResultado(p => ({ ...p, vice: v }))} disabled={jaApurado}>
+              <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+              <SelectContent>
+                {timesExtras.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs text-muted-foreground">Terceiro lugar</label>
+            <Select value={resultado.terceiro} onValueChange={(v) => setResultado(p => ({ ...p, terceiro: v }))} disabled={jaApurado}>
+              <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+              <SelectContent>
+                {timesExtras.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs text-muted-foreground">Artilheiro</label>
+            <Input
+              placeholder="Nome completo..."
+              value={resultado.artilheiro}
+              onChange={(e) => setResultado(p => ({ ...p, artilheiro: e.target.value }))}
+              disabled={jaApurado}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs text-muted-foreground">Melhor jogador</label>
+            <Input
+              placeholder="Nome completo..."
+              value={resultado.melhorJogador}
+              onChange={(e) => setResultado(p => ({ ...p, melhorJogador: e.target.value }))}
+              disabled={jaApurado}
+            />
+          </div>
+
+          {!jaApurado && (
+            <Button onClick={salvarResultadoOficial} disabled={salvandoResultado} size="sm">
+              {salvandoResultado ? "Salvando..." : "Salvar resultado"}
+            </Button>
+          )}
+
+          {resultadoSalvo && !jaApurado && (
+            <Button
+              onClick={handleApurarExtras}
+              disabled={apurandoExtras}
+              size="sm"
+              variant="outline"
+            >
+              {apurandoExtras ? "Apurando..." : "Apurar extras"}
+            </Button>
+          )}
+
+          {jaApurado && (
+            <p className="text-sm text-emerald-500">
+              Extras apurados em {formatarData(apuradoEm)}
+            </p>
           )}
         </div>
       </div>
