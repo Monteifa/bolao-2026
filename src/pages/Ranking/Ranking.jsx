@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/firebase/firebase";
 import { useAuth } from "@/contexts/AuthContext";
@@ -26,6 +27,7 @@ function MetricCard({ label, value, className = "" }) {
 
 export default function Ranking() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [ranking, setRanking] = useState([]);
   const [jogosApurados, setJogosApurados] = useState(0);
   const [jogosRestantes, setJogosRestantes] = useState(0);
@@ -87,6 +89,8 @@ export default function Ranking() {
   const userEntry = ranking.find((r) => r.uid === user?.uid);
   const userPos = ranking.findIndex((r) => r.uid === user?.uid) + 1;
 
+  console.log(userEntry, "userEntry");
+
   const initials = (name) =>
     name
       ?.split(" ")
@@ -128,7 +132,7 @@ export default function Ranking() {
                     {userEntry.nome} — {userPos}º lugar
                   </p>
                   <p className="text-primary-foreground/60 text-xs mt-0.5">
-                    {userEntry.acertosExatos} exatos · {userEntry.acertosVencedor} result. · {userEntry.total - (userEntry.pontosExtras || 0)} jogos + {userEntry.pontosExtras || 0} extras
+                    {userEntry.acertosExatos} exatos · {userEntry.acertosVencedor1} parciais. · {userEntry.acertosVencedor} vencedor · {userEntry.pontosExtras || 0} extras
                   </p>
                 </div>
                 <div className="text-right">
@@ -152,7 +156,8 @@ export default function Ranking() {
               return (
                 <Card
                   key={entry.uid}
-                  className="overflow-hidden"
+                  className="overflow-hidden cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => navigate(`/palpites/${entry.uid}`)}
                 >
                   <CardContent className="px-3 py-0 flex items-center gap-3">
                     <div className="w-7 flex items-center justify-center shrink-0">
@@ -173,7 +178,7 @@ export default function Ranking() {
                         {entry.nome}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {entry.acertosExatos} exatos · {entry.acertosVencedor} result.
+                        {entry.acertosExatos} exatos · {entry.acertosVencedor1} parciais · {entry.acertosVencedor} vencedor.
                         {entry.pontosExtras > 0 && ` · +${entry.pontosExtras} extras`}
                       </p>
                     </div>

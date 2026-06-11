@@ -17,7 +17,7 @@ function StatCard({ label, value, className = "" }) {
     <Card className={className}>
       <CardContent className="p-3 text-center">
         <p className="text-2xl font-bold tabular-nums">{value}</p>
-        <p className="text-[10px] text-muted-foreground mt-0.5">{label}</p>
+        <p className="text-[10px] text-primary-foreground/60 mt-0.5">{label}</p>
       </CardContent>
     </Card>
   );
@@ -26,7 +26,7 @@ function StatCard({ label, value, className = "" }) {
 export default function MeusPalpites() {
   const { user } = useAuth();
   const [items, setItems] = useState([]);
-  const [stats, setStats] = useState({ total: 0, exatos: 0, resultado: 0, erros: 0 });
+  const [stats, setStats] = useState({ total: 0, exatos: 0, vencedor1: 0, vencedor: 0, erros: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -70,10 +70,11 @@ export default function MeusPalpites() {
           (acc, { pontos, tipo }) => ({
             total: acc.total + pontos,
             exatos: acc.exatos + (tipo === "exato" ? 1 : 0),
-            resultado: acc.resultado + (tipo === "vencedor" || tipo === "vencedor1" ? 1 : 0),
+            vencedor1: acc.vencedor1 + (tipo === "vencedor1" ? 1 : 0),
+            vencedor: acc.vencedor + (tipo === "vencedor" ? 1 : 0),
             erros: acc.erros + (tipo === "erro" ? 1 : 0),
           }),
-          { total: 0, exatos: 0, resultado: 0, erros: 0 }
+          { total: 0, exatos: 0, vencedor1: 0, vencedor: 0, erros: 0 }
         );
         setStats(s);
 
@@ -84,7 +85,8 @@ export default function MeusPalpites() {
             foto: user.photoURL,
             total: s.total,
             acertosExatos: s.exatos,
-            acertosVencedor: s.resultado,
+            acertosVencedor1: s.vencedor1,
+            acertosVencedor: s.vencedor,
             erros: s.erros,
             atualizadoEm: serverTimestamp(),
           },
@@ -104,8 +106,11 @@ export default function MeusPalpites() {
     return (
       <Layout>
         <div className="p-4 space-y-3">
-          <div className="grid grid-cols-4 gap-2">
-            {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-16 rounded-xl" />)}
+          <div className="space-y-2">
+            <Skeleton className="h-16 rounded-xl" />
+            <div className="grid grid-cols-4 gap-2">
+              {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-16 rounded-xl" />)}
+            </div>
           </div>
           {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-14 rounded-xl" />)}
         </div>
@@ -116,23 +121,36 @@ export default function MeusPalpites() {
   return (
     <Layout>
       <div className="p-4 space-y-4">
-        <div className="grid grid-cols-4 gap-2">
-          <StatCard label="Pontos" value={stats.total} />
-          <StatCard
-            label="Exatos"
-            value={stats.exatos}
-            className="border-emerald-300 bg-emerald-50 text-emerald-700"
-          />
-          <StatCard
-            label="Resultado"
-            value={stats.resultado}
-            className="border-amber-300 bg-amber-50 text-amber-700"
-          />
-          <StatCard
-            label="Erros"
-            value={stats.erros}
-            className="border-red-300 bg-red-50 text-red-700"
-          />
+        <div className="space-y-4">
+          <div className="w-1/2 mx-auto">
+            <StatCard
+              label="Pontos"
+              value={stats.total}
+              className="bg-primary border-primary text-primary-foreground"
+            />
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            <StatCard
+              label="Exatos"
+              value={stats.exatos}
+              className="border-emerald-300 bg-emerald-50 text-emerald-700"
+            />
+            <StatCard
+              label="Parciais"
+              value={stats.vencedor1}
+              className="border-amber-300 bg-amber-50 text-amber-700"
+            />
+            <StatCard
+              label="Vencedor"
+              value={stats.vencedor}
+              className="border-amber-300 bg-amber-50 text-amber-700"
+            />
+            <StatCard
+              label="Erros"
+              value={stats.erros}
+              className="border-red-300 bg-red-50 text-red-700"
+            />
+          </div>
         </div>
 
         {items.length === 0 ? (

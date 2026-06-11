@@ -9,6 +9,7 @@ import Ranking from "@/pages/Ranking";
 import Admin from "@/pages/Admin/Admin";
 import Predictions from "@/pages/Predictions";
 import Extras from "@/pages/Extras";
+import PalpitesUsuario from "@/pages/PalpitesUsuario/PalpitesUsuario";
 
 import "./index.css";
 
@@ -24,6 +25,7 @@ export default function App() {
             <Route path="/admin" element={<RotaProtegida><Admin /></RotaProtegida>} />
             <Route path="/meus-palpites" element={<RotaProtegida><Predictions /></RotaProtegida>} />
             <Route path="/extras" element={<RotaProtegida><Extras /></RotaProtegida>} />
+            <Route path="/palpites/:uid" element={<RotaProtegida><PalpitesUsuario /></RotaProtegida>} />
           </Routes>
           <Toaster richColors position="top-center" />
         </RankingProvider>
