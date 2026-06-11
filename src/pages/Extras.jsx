@@ -13,8 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
-// Prazo hardcoded: 11 de junho de 2026 às 15h (horário de Brasília)
-const PRAZO_EXTRAS = new Date("2026-06-11T15:00:00-03:00")
+// Prazo hardcoded: 11 de junho de 2026 às 23:58h (horário de Brasília)
+const PRAZO_EXTRAS = new Date("2026-06-11T23:58:00-03:00")
 
 export default function Extras() {
   const { user } = useAuth()
