@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { collection, query, where, getDocs, doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { toast } from "sonner";
 import { db } from "@/firebase/firebase";
 import { useAuth } from "@/contexts/AuthContext";
@@ -77,21 +77,6 @@ export default function MeusPalpites() {
           { total: 0, exatos: 0, vencedor1: 0, vencedor: 0, erros: 0 }
         );
         setStats(s);
-
-        await setDoc(
-          doc(db, "pontuacao", user.uid),
-          {
-            nome: user.displayName,
-            foto: user.photoURL,
-            total: s.total,
-            acertosExatos: s.exatos,
-            acertosVencedor1: s.vencedor1,
-            acertosVencedor: s.vencedor,
-            erros: s.erros,
-            atualizadoEm: serverTimestamp(),
-          },
-          { merge: true }
-        );
       } catch {
         if (!cancelled) toast.error("Erro ao carregar seus palpites.");
       } finally {
