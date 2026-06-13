@@ -34,7 +34,7 @@ export default function Layout({ children }) {
     <div className="min-h-screen flex flex-col">
       <div className="border-b border-line sticky bg-ink/85 backdrop-blur top-0 z-30">
         <div className="mx-auto flex items-center justify-between px-4 py-3 shrink-0">
-          <div className="flex flex-col ">
+          <div className="flex flex-col select-none">
             <span className="text-xs tracking-wider text-muted-foreground leading-tight uppercase">Bolão</span>
             
             <span className="text-lg mt-0.5">
