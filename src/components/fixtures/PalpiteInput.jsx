@@ -4,15 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ROUNDS } from "@/constants/rounds";
-import { formatTime, formatDate } from "@/utils/dateFormatter";
+import { formatTime, formatDate, jogoJaComecou } from "@/utils/dateFormatter";
 import { CountryFlag } from "@/components/CountryFlag";
 
 export default function PalpiteInput({ fixture, palpite, onSave, saving }) {
   const [g1, setG1] = useState(palpite?.golsTime1 ?? "");
   const [g2, setG2] = useState(palpite?.golsTime2 ?? "");
 
-  const gameTime = new Date(fixture.fixture.date);
-  const started = new Date() >= gameTime;
+  const started = jogoJaComecou(fixture);
   const hasPalpite = palpite != null;
   const saved =
     hasPalpite &&

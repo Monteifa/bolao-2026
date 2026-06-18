@@ -13,3 +13,7 @@ export function formatDate(dateStr) {
     timeZone: "America/Sao_Paulo",
   });
 }
+
+export function jogoJaComecou(fixture) {
+  return new Date() >= new Date(fixture.fixture.date);
+}

@@ -117,32 +117,31 @@ export function PalpitesJogosTab({ uid, onLoad }) {
               )}
             </div>
 
-            <div className="flex items-center justify-between px-5 py-3">
+            <div className="flex items-center justify-between px-5 py-2 mt-5">
               <div className="flex flex-col items-center gap-1 flex-1">
                 <CountryFlag country={f.teams.home.name} size={32} />
                 <span className="text-sm font-medium text-center">{f.teams.home.name}</span>
               </div>
-              <div className="flex flex-col items-center gap-1 px-4">
-                {encerrado && (
-                  <div className="flex items-center gap-2 text-lg font-medium">
-                    <span>{r1}</span>
-                    <span className="text-muted-foreground text-sm">–</span>
-                    <span>{r2}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span>{palpite.golsTime1}</span>
-                  <span>×</span>
-                  <span>{palpite.golsTime2}</span>
+              {encerrado && (
+                <div className="flex items-center gap-2 text-lg font-medium px-4 mb-2">
+                  <span>{r1}</span>
+                  <span className="text-muted-foreground text-sm">–</span>
+                  <span>{r2}</span>
                 </div>
-                {encerrado && (
-                  <span className="text-xs text-muted-foreground">palpite</span>
-                )}
-              </div>
+              )}
               <div className="flex flex-col items-center gap-1 flex-1">
                 <CountryFlag country={f.teams.away.name} size={32} />
                 <span className="text-sm font-medium text-center">{f.teams.away.name}</span>
               </div>
+            </div>
+
+            <div className="flex flex-col items-center gap-0.5 pb-3">
+              <div className="flex items-center gap-1.5 text-sm font-medium bg-muted text-muted-foreground px-2.5 py-0.5 rounded-md">
+                <span>{palpite.golsTime1}</span>
+                <span>–</span>
+                <span>{palpite.golsTime2}</span>
+              </div>
+              <span className="text-xs text-muted-foreground">palpite</span>
             </div>
           </div>
         )

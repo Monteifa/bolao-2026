@@ -9,6 +9,7 @@ import {
   detectarRodadaAtual
 } from "@/api/api";
 import { STATUS_LIVE, STATUS_FINISHED } from "@/utils/fixtureStatus";
+import { jogoJaComecou } from "@/utils/dateFormatter";
 import Layout from "@/components/Layout";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LiveCard, PalpiteInput, FinishedCard, Section } from "@/components/fixtures";
@@ -86,6 +87,11 @@ export default function FixturesLists() {
     const fixture = allFixtures.find((f) => f.fixture.id === fixtureId);
 
     if (!fixture) return;
+
+    if (jogoJaComecou(fixture)) {
+      toast.error("Esse jogo já começou. Não é mais possível salvar palpites.");
+      return;
+    }
 
     const status = fixture.fixture.status.short;
     if (STATUS_LIVE.includes(status) || STATUS_FINISHED.includes(status)) return;
