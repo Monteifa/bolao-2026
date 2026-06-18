@@ -1,14 +1,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ROUNDS } from "@/constants/rounds";
-import { TeamLogo } from "@/components/TeamLogo";
+import { CountryFlag } from "@/components/CountryFlag";
 
 export default function LiveCard({ fixture, palpite }) {
   const scoreHome = fixture.goals.home ?? 0;
   const scoreAway = fixture.goals.away ?? 0;
-
-  const homeFlag = fixture.teams.home.logo;
-  const awayFlag = fixture.teams.away.logo;
 
   return (
     <Card className="overflow-hidden">
@@ -24,7 +21,7 @@ export default function LiveCard({ fixture, palpite }) {
         <div className="px-4 py-6">
           <div className="flex items-center gap-3">
             <div className="flex-1 flex flex-col items-center gap-2">
-              <TeamLogo src={homeFlag} name={fixture.teams.home.name} size={32} />
+              <CountryFlag country={fixture.teams.home.name} size={32} />
               <span className="text-sm font-medium text-center leading-tight">
                 {fixture.teams.home.name}
               </span>
@@ -37,7 +34,7 @@ export default function LiveCard({ fixture, palpite }) {
             </div>
 
             <div className="flex-1 flex flex-col items-center gap-2">
-              <TeamLogo src={awayFlag} name={fixture.teams.away.name} size={32} />
+              <CountryFlag country={fixture.teams.away.name} size={32} />
               <span className="text-sm font-medium text-center leading-tight">
                 {fixture.teams.away.name}
               </span>

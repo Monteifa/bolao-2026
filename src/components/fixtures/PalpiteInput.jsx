@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ROUNDS } from "@/constants/rounds";
 import { formatTime, formatDate } from "@/utils/dateFormatter";
-import { TeamLogo } from "@/components/TeamLogo";
+import { CountryFlag } from "@/components/CountryFlag";
 
 export default function PalpiteInput({ fixture, palpite, onSave, saving }) {
   const [g1, setG1] = useState(palpite?.golsTime1 ?? "");
@@ -18,9 +18,6 @@ export default function PalpiteInput({ fixture, palpite, onSave, saving }) {
     hasPalpite &&
     String(palpite.golsTime1) === String(g1) &&
     String(palpite.golsTime2) === String(g2);
-
-  const homeFlag = fixture.teams.home.logo;
-  const awayFlag = fixture.teams.away.logo;
 
   return (
     <Card className="overflow-hidden p-3">
@@ -43,7 +40,7 @@ export default function PalpiteInput({ fixture, palpite, onSave, saving }) {
         <div className="px-4 py-3">
           <div className="flex items-center gap-3">
             <div className="flex-1 flex flex-col items-center gap-2">
-              <TeamLogo src={homeFlag} name={fixture.teams.home.name} size={32} />
+              <CountryFlag country={fixture.teams.home.name} size={32} />
               <span className="text-sm font-medium text-center leading-tight">
                 {fixture.teams.home.name}
               </span>
@@ -73,7 +70,7 @@ export default function PalpiteInput({ fixture, palpite, onSave, saving }) {
             </div>
 
             <div className="flex-1 flex flex-col items-center gap-2">
-              <TeamLogo src={awayFlag} name={fixture.teams.away.name} size={32} />
+              <CountryFlag country={fixture.teams.away.name} size={32} />
               <span className="text-sm font-medium text-center leading-tight">
                 {fixture.teams.away.name}
               </span>

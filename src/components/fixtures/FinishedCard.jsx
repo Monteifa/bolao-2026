@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ROUNDS } from "@/constants/rounds";
 import { calcularPontos } from "@/utils/pontuacao";
 import { formatDate } from "@/utils/dateFormatter";
-import { TeamLogo } from "@/components/TeamLogo";
+import { CountryFlag } from "@/components/CountryFlag";
 
 export default function FinishedCard({ fixture, palpite }) {
   const scoreHome = fixture.goals.home ?? 0;
@@ -36,7 +36,7 @@ export default function FinishedCard({ fixture, palpite }) {
         <div className="px-4 py-6">
           <div className="flex items-center gap-3">
             <div className="flex-1 flex flex-col items-center gap-2">
-              <TeamLogo src={fixture.teams.home.logo} name={fixture.teams.home.name} size={40} />
+              <CountryFlag country={fixture.teams.home.name} size={40} />
               <span className="text-xs font-medium text-center leading-tight">{fixture.teams.home.name}</span>
             </div>
 
@@ -47,7 +47,7 @@ export default function FinishedCard({ fixture, palpite }) {
             </div>
 
             <div className="flex-1 flex flex-col items-center gap-2">
-              <TeamLogo src={fixture.teams.away.logo} name={fixture.teams.away.name} size={40} />
+              <CountryFlag country={fixture.teams.away.name} size={40} />
               <span className="text-xs font-medium text-center leading-tight">{fixture.teams.away.name}</span>
             </div>
           </div>

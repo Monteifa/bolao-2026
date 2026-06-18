@@ -1,82 +1,42 @@
 import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore"
+import { doc, getDoc } from "firebase/firestore"
 import { db } from "@/firebase/firebase"
-import { fetchTodosFixtures } from "@/api/api"
-import { calcularPontos } from "@/utils/pontuacao"
-import { STATUS_FINISHED, STATUS_LIVE } from "@/utils/fixtureStatus"
 import Layout from "@/components/Layout"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
-
-const STATUS_VISIVEIS = [...STATUS_FINISHED, ...STATUS_LIVE]
+import { ArrowLeft, Volleyball, Star } from "lucide-react"
+import { PalpitesJogosTab } from "@/components/PalpitesJogosTab"
+import { PalpitesExtrasTab } from "@/components/PalpitesExtrasTab"
 
 export default function PalpitesUsuario() {
   const { uid } = useParams()
   const navigate = useNavigate()
   const [usuario, setUsuario] = useState(null)
-  const [lista, setLista] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loadingUsuario, setLoadingUsuario] = useState(true)
+  const [tabsVisitadas, setTabsVisitadas] = useState({ jogos: true, extras: false })
+  const [tabAtiva, setTabAtiva] = useState("jogos")
+  const [totalJogos, setTotalJogos] = useState(null)
+
+  const handleTabChange = (value) => {
+    setTabAtiva(value)
+    setTabsVisitadas((prev) => ({ ...prev, [value]: true }))
+  }
 
   useEffect(() => {
     const load = async () => {
-      try {
-        const usuarioSnap = await getDoc(doc(db, "usuarios", uid))
-        if (!usuarioSnap.exists()) {
-          navigate("/ranking")
-          return
-        }
-        setUsuario(usuarioSnap.data())
-
-        const snap = await getDocs(
-          query(collection(db, "palpites"), where("userId", "==", uid))
-        )
-        const palpites = {}
-        snap.forEach((d) => {
-          const data = d.data()
-          palpites[String(data.fixtureId)] = data
-        })
-
-        const fixtures = await fetchTodosFixtures()
-
-        const cruzado = (fixtures ?? [])
-          .filter(
-            (f) =>
-              STATUS_VISIVEIS.includes(f.fixture.status.short) &&
-              palpites[String(f.fixture.id)]
-          )
-          .map((f) => ({
-            fixture: f,
-            palpite: palpites[String(f.fixture.id)],
-          }))
-          .sort(
-            (a, b) =>
-              new Date(b.fixture.fixture.date) - new Date(a.fixture.fixture.date)
-          )
-
-        setLista(cruzado)
-      } catch (err) {
-        console.error(err)
-      } finally {
-        setLoading(false)
+      const snap = await getDoc(doc(db, "usuarios", uid))
+      if (!snap.exists()) {
+        navigate("/ranking")
+        return
       }
+      setUsuario(snap.data())
+      setLoadingUsuario(false)
     }
-
     load()
   }, [uid, navigate])
 
-  if (loading) {
-    return (
-      <Layout>
-        <div className="p-4 space-y-3">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-24 w-full rounded-xl" />
-          ))}
-        </div>
-      </Layout>
-    )
-  }
+  if (loadingUsuario) return null
 
   return (
     <Layout>
@@ -101,85 +61,45 @@ export default function PalpitesUsuario() {
         )}
         <div>
           <p className="text-sm font-medium">{usuario?.nome}</p>
-          <p className="text-xs text-muted-foreground">{lista.length} palpites visíveis</p>
+          {tabAtiva === "jogos" && totalJogos !== null && (
+            <p className="text-xs text-muted-foreground">{totalJogos} palpites visíveis</p>
+          )}
         </div>
       </div>
 
-      <div className="p-4 space-y-3">
-        {lista.map(({ fixture: f, palpite }) => {
-          const encerrado = STATUS_FINISHED.includes(f.fixture.status.short)
-          const r1 = f.goals.home
-          const r2 = f.goals.away
-          const { pontos, tipo } = encerrado
-            ? calcularPontos(palpite, { golsTime1: r1, golsTime2: r2 })
-            : { pontos: null, tipo: null }
+      <Tabs
+        defaultValue="jogos"
+        className="w-full"
+        onValueChange={handleTabChange}
+      >
+        <TabsList
+          className="grid grid-cols-2 gap-1 p-0! mx-4 mt-3"
+          style={{ width: "calc(100% - 2rem)" }}          
+        >
+          <TabsTrigger
+            value="jogos"
+            className="h-full rounded-lg gap-1.5 data-[state=active]:bg-teal-500! data-[state=active]:text-[#04342C]!"
+          >
+            <Volleyball size={15} aria-hidden="true" />
+            Jogos
+          </TabsTrigger>
+          <TabsTrigger
+            value="extras"
+            className="h-full rounded-lg gap-1.5 data-[state=active]:bg-teal-500! data-[state=active]:text-[#04342C]!"
+          >
+            <Star size={15} aria-hidden="true" />
+            Extras
+          </TabsTrigger>
+        </TabsList>
 
-          const ptsBadge =
-            tipo === "exato"     ? "bg-green-100 text-green-800"  :
-            tipo === "vencedor1" ? "bg-amber-100 text-amber-800"  :
-            tipo === "vencedor"  ? "bg-blue-100 text-blue-800"    :
-            tipo === "erro"      ? "bg-red-100 text-red-800"      : ""
+        <TabsContent value="jogos" className="p-4">
+          {tabsVisitadas.jogos && <PalpitesJogosTab uid={uid} onLoad={setTotalJogos} />}
+        </TabsContent>
 
-          const ptsLabel =
-            tipo === "exato"     ? "+10 Exato"    :
-            tipo === "vencedor1" ? "+7 Parcial"   :
-            tipo === "vencedor"  ? "+5 Resultado" :
-            tipo === "erro"      ? "+0"           : ""
-
-          return (
-            <div key={f.fixture.id} className="bg-card border border-border rounded-xl overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-2 border-b border-border">
-                <span className="text-xs text-muted-foreground">
-                  {f.league.round} · {new Date(f.fixture.date).toLocaleDateString("pt-BR")}
-                </span>
-                {encerrado && pontos !== null && (
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${ptsBadge}`}>
-                    {ptsLabel}
-                  </span>
-                )}
-                {!encerrado && (
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-red-100 text-red-800 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block" />
-                    Ao vivo
-                  </span>
-                )}
-              </div>
-
-              <div className="flex items-center justify-between px-5 py-3">
-                <div className="flex flex-col items-center gap-1 flex-1">
-                  <span className="text-sm font-medium text-center">{f.teams.home.name}</span>
-                </div>
-                <div className="flex flex-col items-center gap-1 px-4">
-                  {encerrado && (
-                    <div className="flex items-center gap-2 text-lg font-medium">
-                      <span>{r1}</span>
-                      <span className="text-muted-foreground text-sm">–</span>
-                      <span>{r2}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>{palpite.golsTime1}</span>
-                    <span>×</span>
-                    <span>{palpite.golsTime2}</span>
-                  </div>
-                  {encerrado && (
-                    <span className="text-xs text-muted-foreground">palpite</span>
-                  )}
-                </div>
-                <div className="flex flex-col items-center gap-1 flex-1">
-                  <span className="text-sm font-medium text-center">{f.teams.away.name}</span>
-                </div>
-              </div>
-            </div>
-          )
-        })}
-
-        {lista.length === 0 && (
-          <div className="text-center py-16 text-muted-foreground text-sm">
-            Nenhum palpite disponível ainda.
-          </div>
-        )}
-      </div>
+        <TabsContent value="extras" className="p-4">
+          {tabsVisitadas.extras && <PalpitesExtrasTab uid={uid} />}
+        </TabsContent>
+      </Tabs>
     </Layout>
   )
 }
