@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/__/auth/:path*",
+      "destination": "https://bolao-copa-26-b0f8c.firebaseapp.com/__/auth/:path*"
+    },
+    {
       "source": "/api/images/:path*",
       "destination": "/api/images/:path*"
     },
