@@ -201,7 +201,7 @@ export default function Admin() {
         </div>
 
         <div className="space-y-2">
-          {fixtures.map((fixture) => {
+          {[...fixtures].reverse().map((fixture) => {
             const id = fixture.fixture.id;
             const apurado = jogosApurados.includes(String(id));
             const emAndamento = apurandoId === id;
