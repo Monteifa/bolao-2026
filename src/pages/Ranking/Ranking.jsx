@@ -132,7 +132,7 @@ export default function Ranking() {
                     {userEntry.nome} — {userPos}º lugar
                   </p>
                   <p className="text-primary-foreground/60 text-xs mt-0.5">
-                    {userEntry.acertosExatos} exatos · {userEntry.acertosVencedor1} parciais. · {userEntry.acertosVencedor} vencedor · {userEntry.pontosExtras || 0} extras
+                    {userEntry.acertosExatos} exatos · {userEntry.acertosVencedor1} parciais · {userEntry.acertosVencedor} vencedor · {userEntry.pontosExtras || 0} extras · {userEntry.erros || 0} erros
                   </p>
                 </div>
                 <div className="text-right">
@@ -178,7 +178,7 @@ export default function Ranking() {
                         {entry.nome}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {entry.acertosExatos} exatos · {entry.acertosVencedor1} parciais · {entry.acertosVencedor} vencedor.
+                        {entry.acertosExatos} exatos · {entry.acertosVencedor1} parciais · {entry.acertosVencedor} vencedor. · {entry.erros} erros.
                         {entry.pontosExtras > 0 && ` · +${entry.pontosExtras} extras`}
                       </p>
                     </div>
