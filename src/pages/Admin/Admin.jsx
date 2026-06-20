@@ -6,6 +6,7 @@ import { db } from "@/firebase/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchRounds, fetchFixturesByRound } from "@/api/api";
 import { apurarJogo, apurarTodosPendentes, apurarExtras } from "@/lib/apuracao";
+import { migrarFotosPalpitesAntigos } from "@/lib/migracao";
 import { extrairTimes } from "@/lib/times";
 import { normalizar } from "@/utils/pontuacao";
 import Layout from "@/components/Layout";
@@ -30,6 +31,7 @@ export default function Admin() {
   const [apuradoEm, setApuradoEm] = useState(null);
   const [apurandoExtras, setApurandoExtras] = useState(false);
   const [salvandoResultado, setSalvandoResultado] = useState(false);
+  const [migrando, setMigrando] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -155,6 +157,20 @@ export default function Admin() {
       toast.error("Erro ao apurar extras");
     } finally {
       setApurandoExtras(false);
+    }
+  };
+
+  const handleMigrarFotos = async () => {
+    if (migrando) return;
+    setMigrando(true);
+    try {
+      const resultado = await migrarFotosPalpitesAntigos();
+      toast.success(resultado.mensagem);
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao migrar fotos dos palpites");
+    } finally {
+      setMigrando(false);
     }
   };
 
@@ -321,6 +337,23 @@ export default function Admin() {
               Extras apurados em {formatarData(apuradoEm)}
             </p>
           )}
+        </div>
+
+        {/* ── Manutenção ── */}
+        <div className="border-t border-border pt-4 space-y-3">
+          <p className="text-sm font-semibold">Manutenção</p>
+          <p className="text-xs text-muted-foreground">
+            Atualiza palpites antigos que ainda não têm a foto do usuário salva.
+            Pode ser executado quantas vezes for necessário — só atualiza o que ainda estiver faltando.
+          </p>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={migrando}
+            onClick={handleMigrarFotos}
+          >
+            {migrando ? "Migrando..." : "Atualizar fotos de palpites antigos"}
+          </Button>
         </div>
       </div>
     </Layout>

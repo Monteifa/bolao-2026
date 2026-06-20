@@ -98,7 +98,7 @@ export default function PalpitesJogo() {
 
   return (
     <Layout>
-      <div className="border-b border-border">
+      <div className="border-b border-border sticky top-16 z-10 bg-ink/85 backdrop-blur">
         <div className="flex items-center gap-2 px-4 py-3">
           <Button
             variant="ghost"
@@ -162,7 +162,7 @@ export default function PalpitesJogo() {
               className="bg-card border border-border rounded-xl cursor-pointer hover:bg-muted/50 transition-colors"
               onClick={() => navigate(`/palpites/${p.userId}`)}
             >
-              <CardContent className="px-4 py-3 flex items-center justify-between gap-3">
+              <CardContent className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <Avatar className="w-9 h-9 shrink-0">
                     <AvatarImage src={p.foto} />
