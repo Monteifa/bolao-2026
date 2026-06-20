@@ -9,6 +9,7 @@ import {
   detectarRodadaAtual
 } from "@/api/api";
 import { STATUS_LIVE, STATUS_FINISHED } from "@/utils/fixtureStatus";
+import { useNavigate } from "react-router-dom";
 import { jogoJaComecou } from "@/utils/dateFormatter";
 import Layout from "@/components/Layout";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,6 +18,7 @@ import { RegrasDialog } from "@/components/RegrasDialog";
 
 export default function FixturesLists() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [rounds, setRounds] = useState([]);
   const [selectedRound, setSelectedRound] = useState(null);
   const [fixturesData, setFixturesData] = useState({ round: null, list: [], palpites: {} });
@@ -102,7 +104,8 @@ export default function FixturesLists() {
       const docRef = doc(db, "palpites", `${user.uid}_${fixtureId}`);
       const data = {
         userId: user.uid,
-        name: user.displayName,
+        nome: user.displayName,
+        foto: user.photoURL,
         fixtureId: id,
         golsTime1: Number(g1),
         golsTime2: Number(g2),
@@ -167,7 +170,7 @@ export default function FixturesLists() {
           <>
             <Section title="Ao vivo agora" count={live.length}>
               {live.map((f) => (
-                <LiveCard key={f.fixture.id} fixture={f} palpite={palpitesMap[f.fixture.id]} />
+                <LiveCard key={f.fixture.id} fixture={f} palpite={palpitesMap[f.fixture.id]} onClick={() => navigate(`/jogo/${f.fixture.id}`)} />
               ))}
             </Section>
 
@@ -185,7 +188,7 @@ export default function FixturesLists() {
 
             <Section title="Encerrados" count={finished.length}>
               {finished.map((f) => (
-                <FinishedCard key={f.fixture.id} fixture={f} palpite={palpitesMap[f.fixture.id]} />
+                <FinishedCard key={f.fixture.id} fixture={f} palpite={palpitesMap[f.fixture.id]} onClick={() => navigate(`/jogo/${f.fixture.id}`)} />
               ))}
             </Section>
 

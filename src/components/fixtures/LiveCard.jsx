@@ -2,13 +2,18 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ROUNDS } from "@/constants/rounds";
 import { CountryFlag } from "@/components/CountryFlag";
+import { ChevronRight } from "lucide-react"
 
-export default function LiveCard({ fixture, palpite }) {
+export default function LiveCard({ fixture, palpite, onClick }) {
   const scoreHome = fixture.goals.home ?? 0;
   const scoreAway = fixture.goals.away ?? 0;
 
   return (
-    <Card className="overflow-hidden">
+    <div className="relative">
+    <Card
+      className={`${onClick ? " cursor-pointer hover:bg-muted/50 transition-colors" : ""}`}
+      onClick={onClick}
+    >
       <CardContent className="p-0">
         <div className="flex items-center justify-between px-6">
           <Badge className="bg-red-500 text-white text-xs py-0 gap-1">
@@ -45,9 +50,8 @@ export default function LiveCard({ fixture, palpite }) {
         {palpite ? (
           <div className="px-6 pt-3 border-t border-border flex items-center justify-between">
             <span className="text-xs text-muted-foreground">
-              {palpite ? `Seu palpite: ${palpite.golsTime1}-${palpite.golsTime2}` : "Sem palpite"}
+              {`Seu palpite: ${palpite.golsTime1}-${palpite.golsTime2}`}
             </span>
-            
           </div>
         ) : (
           <div className="px-3 py-2 border-t border-border">
@@ -56,5 +60,11 @@ export default function LiveCard({ fixture, palpite }) {
         )}
       </CardContent>
     </Card>
+    {onClick && (
+      <div className="w-6 h-6 rounded-full flex items-center justify-center absolute -right-3 top-1/2 -translate-y-1/2 bg-teal-500">
+        <ChevronRight className="ml-0.5"/>
+      </div>
+    )}
+    </div>
   );
 }

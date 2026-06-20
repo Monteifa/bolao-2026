@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { collection, query, where, getDocs } from "firebase/firestore"
 import { db } from "@/firebase/firebase"
 import { fetchTodosFixtures } from "@/api/api"
@@ -10,6 +11,7 @@ import { CountryFlag } from "@/components/CountryFlag"
 const STATUS_VISIVEIS = [...STATUS_FINISHED, ...STATUS_LIVE]
 
 export function PalpitesJogosTab({ uid, onLoad }) {
+  const navigate = useNavigate()
   const [lista, setLista] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -99,7 +101,7 @@ export function PalpitesJogosTab({ uid, onLoad }) {
           tipo === "erro"      ? "+0"           : ""
 
         return (
-          <div key={f.fixture.id} className="bg-card border border-border rounded-xl overflow-hidden">
+          <div key={f.fixture.id} className="bg-card border border-border rounded-xl overflow-hidden cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate(`/jogo/${f.fixture.id}`)}>
             <div className="flex items-center justify-between px-4 py-2 border-b border-border">
               <span className="text-xs text-muted-foreground">
                 {f.league.round} · {new Date(f.fixture.date).toLocaleDateString("pt-BR")}
@@ -142,6 +144,9 @@ export function PalpitesJogosTab({ uid, onLoad }) {
                 <span>{palpite.golsTime2}</span>
               </div>
               <span className="text-xs text-muted-foreground">palpite</span>
+            </div>
+            <div className="text-center py-1.5 text-xs text-muted-foreground border-t border-border">
+              Ver palpites de todos <i className="ti ti-chevron-right text-xs" aria-hidden="true" />
             </div>
           </div>
         )

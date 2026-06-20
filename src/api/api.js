@@ -61,8 +61,14 @@ export async function fetchRounds() {
 }
 
 export async function fetchFixtureById(fixtureId) {
-  const res = await fetchFromAPI("fixtures", { id: fixtureId });
-  return res?.[0] ?? null;
+  const url = new URL(`${BASE_URL}/fixtures`);
+  url.searchParams.set("id", fixtureId); // ← só o id, sem league/season
+
+  const { data } = await axios.get(url.toString(), {
+    headers: { "x-apisports-key": API_KEY },
+  });
+
+  return data.response?.[0] ?? null;
 }
 
 // ─── novas ─────────────────────────────────────────────────────

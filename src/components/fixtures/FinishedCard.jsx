@@ -4,8 +4,9 @@ import { ROUNDS } from "@/constants/rounds";
 import { calcularPontos } from "@/utils/pontuacao";
 import { formatDate } from "@/utils/dateFormatter";
 import { CountryFlag } from "@/components/CountryFlag";
+import { ChevronRight } from "lucide-react"
 
-export default function FinishedCard({ fixture, palpite }) {
+export default function FinishedCard({ fixture, palpite, onClick }) {
   const scoreHome = fixture.goals.home ?? 0;
   const scoreAway = fixture.goals.away ?? 0;
 
@@ -24,7 +25,11 @@ export default function FinishedCard({ fixture, palpite }) {
       : "border border-red-500 text-red-500 bg-transparent";
 
   return (
-    <Card className="overflow-hidden">
+    <div className="relative">
+    <Card
+      className={`overflow-hidden${onClick ? " cursor-pointer hover:bg-muted/50 transition-colors" : ""}`}
+      onClick={onClick}
+    >
       <CardContent className="p-0">
         <div className="flex items-center justify-between px-6">
           <span className="text-xs text-muted-foreground">Encerrado</span>
@@ -63,7 +68,14 @@ export default function FinishedCard({ fixture, palpite }) {
             </Badge>
           )}
         </div>
+
       </CardContent>
     </Card>
+    {onClick && (
+      <div className="w-6 h-6 rounded-full flex items-center justify-center absolute -right-3 top-1/2 -translate-y-1/2 bg-teal-500">
+        <ChevronRight className="ml-0.5"/>
+      </div>
+    )}
+    </div>
   );
 }

@@ -10,6 +10,7 @@ import Admin from "@/pages/Admin/Admin";
 import Predictions from "@/pages/Predictions";
 import Extras from "@/pages/Extras";
 import PalpitesUsuario from "@/pages/PalpitesUsuario/PalpitesUsuario";
+import PalpitesJogo from "@/pages/PalpitesJogo";
 
 import "./index.css";
 
@@ -26,6 +27,7 @@ export default function App() {
             <Route path="/meus-palpites" element={<RotaProtegida><Predictions /></RotaProtegida>} />
             <Route path="/extras" element={<RotaProtegida><Extras /></RotaProtegida>} />
             <Route path="/palpites/:uid" element={<RotaProtegida><PalpitesUsuario /></RotaProtegida>} />
+            <Route path="/jogo/:fixtureId" element={<RotaProtegida><PalpitesJogo /></RotaProtegida>} />
           </Routes>
           <Toaster richColors position="top-center" />
         </RankingProvider>
