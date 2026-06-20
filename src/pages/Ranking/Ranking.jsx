@@ -33,6 +33,13 @@ export default function Ranking() {
   const [jogosRestantes, setJogosRestantes] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  const getPosition = (pos) => {
+    if (pos === 1) return <Trophy className="w-5 h-5 text-yellow-500" />;
+    if (pos === 2) return <Trophy className="w-5 h-5 text-slate-400" />;
+    if (pos === 3) return <Trophy className="w-5 h-5 text-amber-800" />;
+    return <span className="text-sm font-bold text-muted-foreground">{pos}</span>;
+  };
+
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
@@ -88,8 +95,6 @@ export default function Ranking() {
 
   const userEntry = ranking.find((r) => r.uid === user?.uid);
   const userPos = ranking.findIndex((r) => r.uid === user?.uid) + 1;
-
-  console.log(userEntry, "userEntry");
 
   const initials = (name) =>
     name
@@ -161,11 +166,7 @@ export default function Ranking() {
                 >
                   <CardContent className="px-3 py-0 flex items-center gap-3">
                     <div className="w-7 flex items-center justify-center shrink-0">
-                      {pos === 1 ? (
-                        <Trophy className="w-5 h-5 text-yellow-500" />
-                      ) : (
-                        <span className="text-sm font-bold text-muted-foreground">{pos}</span>
-                      )}
+                      {getPosition(pos)}
                     </div>
 
                     <Avatar className="w-9 h-9 shrink-0">
@@ -178,7 +179,10 @@ export default function Ranking() {
                         {entry.nome}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {entry.acertosExatos} exatos · {entry.acertosVencedor1} parciais · {entry.acertosVencedor} vencedor. · {entry.erros} erros.
+                        {entry.acertosExatos} exatos · {entry.acertosVencedor1} parciais · {entry.acertosVencedor} vencedor · {entry.erros} erros
+                      </p>
+
+                      <p className="text-xs text-muted-foreground">                        
                         {entry.pontosExtras > 0 && ` · +${entry.pontosExtras} extras`}
                       </p>
                     </div>
