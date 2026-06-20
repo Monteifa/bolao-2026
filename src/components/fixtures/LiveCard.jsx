@@ -61,7 +61,7 @@ export default function LiveCard({ fixture, palpite, onClick }) {
       </CardContent>
     </Card>
     {onClick && (
-      <div className="w-6 h-6 rounded-full flex items-center justify-center absolute -right-3 top-1/2 -translate-y-1/2 bg-teal-500">
+      <div className="w-6 h-6 rounded-full flex items-center justify-center absolute -right-1.5 top-1/2 -translate-y-1/2 bg-teal-500">
         <ChevronRight className="ml-0.5"/>
       </div>
     )}
