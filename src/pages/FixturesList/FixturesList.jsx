@@ -56,7 +56,20 @@ export default function FixturesLists() {
     };
 
     init();
-    return () => { cancelled = true; };
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const todos = await fetchTodosFixtures();
+        setAllFixtures(todos);
+      } catch {
+        // silent — stale data is better than an error toast on background refresh
+      }
+    }, 120_000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(pollInterval);
+    };
   }, []);
 
   // troca de rodada filtra localmente — sem nova chamada à API
