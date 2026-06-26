@@ -8,7 +8,7 @@ const LEAGUE = 1;
 const SEASON = 2026;
 const CACHE_TTL_MS = {
   rounds: 24 * 60 * 60 * 1000,
-  fixtures: 5 * 60 * 1000,
+  fixtures: 3 * 60 * 1000,
 };
 
 const STATUS_LIVE = ["1H", "HT", "2H", "ET", "BT", "P", "SUSP", "INT"];
@@ -19,7 +19,7 @@ const fetchFromAPI = async (endpoint, params = {}) => {
   url.searchParams.set("season", SEASON);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 
-  const { data } = await axios.get(url.toString(), {
+const { data } = await axios.get(url.toString(), {
     headers: {
       "x-apisports-key": API_KEY,
     },
