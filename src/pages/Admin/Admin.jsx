@@ -9,6 +9,7 @@ import { apurarJogo, apurarTodosPendentes, apurarExtras } from "@/lib/apuracao";
 import { migrarFotosPalpitesAntigos } from "@/lib/migracao";
 import { extrairTimes } from "@/lib/times";
 import { normalizar } from "@/utils/pontuacao";
+import { STATUS_FINISHED } from "@/utils/fixtureStatus";
 import Layout from "@/components/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -50,7 +51,7 @@ export default function Admin() {
         }
 
         setJogosApurados(apuradosSnap.docs.map((d) => d.id));
-        setFixtures(allFixtures.filter((f) => f.fixture.status.short === "FT"));
+        setFixtures(allFixtures.filter((f) => STATUS_FINISHED.includes(f.fixture.status.short)));
         setTimesExtras(extrairTimes(allFixtures));
 
         if (resultadoSnap.exists()) {
