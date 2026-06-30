@@ -82,8 +82,8 @@ export function PalpitesJogosTab({ uid, onLoad }) {
     <div className="space-y-3">
       {lista.map(({ fixture: f, palpite }) => {
         const encerrado = STATUS_FINISHED.includes(f.fixture.status.short)
-        const r1 = f.goals.home
-        const r2 = f.goals.away
+        const r1 = f.score?.fulltime?.home ?? f.goals.home
+        const r2 = f.score?.fulltime?.away ?? f.goals.away
         const { pontos, tipo } = encerrado
           ? calcularPontos(palpite, { golsTime1: r1, golsTime2: r2 })
           : { pontos: null, tipo: null }

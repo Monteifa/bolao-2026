@@ -57,8 +57,8 @@ export default function MeusPalpites() {
           .map((f) => {
             const palpite = palpitesMap[f.fixture.id];
             const { pontos, tipo } = calcularPontos(palpite, {
-              golsTime1: f.goals.home ?? 0,
-              golsTime2: f.goals.away ?? 0,
+              golsTime1: f.score?.fulltime?.home ?? f.goals.home ?? 0,
+              golsTime2: f.score?.fulltime?.away ?? f.goals.away ?? 0,
             });
             return { fixture: f, palpite, pontos, tipo };
           })

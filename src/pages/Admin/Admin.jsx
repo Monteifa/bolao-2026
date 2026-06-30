@@ -103,8 +103,8 @@ export default function Admin() {
     setApurandoId(fixture.fixture.id);
     try {
       const res = await apurarJogo(fixture.fixture.id, {
-        golsTime1: fixture.goals.home,
-        golsTime2: fixture.goals.away,
+        golsTime1: fixture.score?.fulltime?.home ?? fixture.goals.home,
+        golsTime2: fixture.score?.fulltime?.away ?? fixture.goals.away,
       });
       if (res.sucesso) {
         setJogosApurados((prev) => [...prev, String(fixture.fixture.id)]);

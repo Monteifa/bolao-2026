@@ -45,7 +45,8 @@ export async function apurarJogo(fixtureId, resultadoReal) {
 }
 
 export async function apurarTodosPendentes(fixtures, jogosApurados) {
-  const jogosFT = fixtures.filter((f) => f.fixture.status.short === "FT");
+  const FINISHED = ["FT", "AET", "PEN"];
+  const jogosFT = fixtures.filter((f) => FINISHED.includes(f.fixture.status.short));
   const pendentes = jogosFT.filter(
     (f) => !jogosApurados.includes(String(f.fixture.id))
   );
@@ -53,8 +54,8 @@ export async function apurarTodosPendentes(fixtures, jogosApurados) {
   const resultados = [];
   for (const jogo of pendentes) {
     const resultado = await apurarJogo(jogo.fixture.id, {
-      golsTime1: jogo.goals.home,
-      golsTime2: jogo.goals.away,
+      golsTime1: jogo.score?.fulltime?.home ?? jogo.goals.home,
+      golsTime2: jogo.score?.fulltime?.away ?? jogo.goals.away,
     });
     resultados.push({ fixtureId: jogo.fixture.id, ...resultado });
   }

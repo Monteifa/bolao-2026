@@ -54,7 +54,10 @@ export default function PalpitesJogo() {
         if (cancelled) return
 
         const encerrado = STATUS_FINISHED.includes(f.fixture.status.short)
-        const resultadoReal = { golsTime1: f.goals.home, golsTime2: f.goals.away }
+        const resultadoReal = {
+          golsTime1: f.score?.fulltime?.home ?? f.goals.home,
+          golsTime2: f.score?.fulltime?.away ?? f.goals.away,
+        }
 
         const lista = snap.docs
           .map((d) => {
